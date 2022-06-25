@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<head lang="zh-CN">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>语音朗读</title>
+</head>
+<body>
+  <button type="button" onclick="recognition.start()">点击识别语音</button>
+  <button type="button" onclick="recognition.stop()">结束语音识别</button>
+  <p id="status"></p>
+  <p id="output"></p>
+  <script type="text/javascript">
+    // 目前只有Chrome和Edge支持该特性，在使用时需要加私有化前缀
+    const SpeechRecognition = window.webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    const output = document.getElementById("output")
+    const status = document.getElementById("status")
+
+    // 语音识别开始的钩子
+    recognition.onstart = function() {
+      output.innerText = ''
+      status.innerText = '语音识别开始'
+    }
+    // 如果没有声音则结束的钩子
+    recognition.onspeechend = function() {
+      status.innerText = "语音识别结束"
+      recognition.stop()
+    }
+    // 识别错误的钩子
+    recognition.onerror = function({ error }) {
+      const errorMessage = {
+        'not-speech': '未检测到声源',
+        'not-allowed': '未检测到麦克风设备或未允许浏览器使用麦克风'
+      }
+      status.innerText = errorMessage[ error ] || '语音识别错误'
+    }
+    // 识别结果的钩子，
+    // 可通过interimResults控制是否实时识别，maxAlternatives设置识别结果的返回数量
+    recognition.onresult = function({ results }) {
+      const { transcript, confidence } = results[0][0]
+      output.innerText = `识别的内容：${ transcript }，识别率：${ (confidence * 100).toFixed(2) }%`
+    }
+  </script>
+</body>
+</html>
